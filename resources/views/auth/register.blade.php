@@ -45,7 +45,7 @@
                 </div>
                 <div class="col-lg-5 col-md-7 bg-white">
                     <div class="p-3">
-                        <img src="{{ asset('assets/images/big/icon.png') }}" alt="SiKasir">
+                        <!-- <img src="{{ asset('assets/images/big/icon.png') }}" alt="SiKasir"> -->
                         <h2 class="mt-3 text-center">SiKasir - Sign Up</h2>
                         <p class="text-center">Register as Store Owner (Pimpinan)</p>
 

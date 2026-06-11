@@ -45,9 +45,9 @@
                 </div>
                 <div class="col-lg-5 col-md-7 bg-white">
                     <div class="p-3">
-                        <div class="text-center">
+                        <!-- <div class="text-center">
                             <img src="{{ asset('assets/images/big/icon.png') }}" alt="SiKasir">
-                        </div>
+                        </div> -->
                         <h2 class="mt-3 text-center">SiKasir - Sign In</h2>
                         <p class="text-center">Enter your email address and password to access admin panel.</p>
 
