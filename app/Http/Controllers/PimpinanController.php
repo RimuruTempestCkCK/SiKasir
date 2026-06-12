@@ -31,12 +31,17 @@ class PimpinanController extends Controller
         $totalCashiers = User::where('store_id', $store->id)->where('role', 'kasir')->count();
         $totalSales = Transaction::where('store_id', $store->id)->sum('total_price') ?: 0;
         $totalStock = Product::where('store_id', $store->id)->sum('stock') ?: 0;
+        
+        $totalProfit = TransactionDetail::join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->where('transactions.store_id', $store->id)
+            ->selectRaw('SUM((transaction_details.selling_price - transaction_details.purchase_price) * transaction_details.quantity) as profit')
+            ->first()->profit ?: 0;
 
         // 2. Total Sales by Category (Donut Chart)
         $salesByCategory = TransactionDetail::join('products', 'transaction_details.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->where('products.store_id', $store->id)
-            ->selectRaw('categories.name as category, SUM(transaction_details.quantity * transaction_details.price) as total')
+            ->selectRaw('categories.name as category, SUM(transaction_details.quantity * transaction_details.selling_price) as total')
             ->groupBy('categories.name')
             ->get();
 
@@ -66,14 +71,14 @@ class PimpinanController extends Controller
         // 6. Top Products (Leader Table)
         $topProducts = TransactionDetail::join('products', 'transaction_details.product_id', '=', 'products.id')
             ->where('products.store_id', $store->id)
-            ->selectRaw('products.id, products.name, products.price, SUM(transaction_details.quantity) as total_qty, SUM(transaction_details.quantity * transaction_details.price) as revenue')
-            ->groupBy('products.id', 'products.name', 'products.price')
+            ->selectRaw('products.id, products.name, products.selling_price, SUM(transaction_details.quantity) as total_qty, SUM(transaction_details.quantity * transaction_details.selling_price) as revenue')
+            ->groupBy('products.id', 'products.name', 'products.selling_price')
             ->orderBy('revenue', 'desc')
             ->take(5)
             ->get();
 
         return view('pimpinan.dashboard', compact(
-            'store', 'totalProducts', 'totalCashiers', 'totalSales', 'totalStock',
+            'store', 'totalProducts', 'totalCashiers', 'totalSales', 'totalStock', 'totalProfit',
             'salesByCategory', 'monthlySales', 'salesDaily', 'recentTransactions', 'topProducts'
         ));
     }
@@ -97,7 +102,8 @@ class PimpinanController extends Controller
         $request->validate([
             'name' => 'required',
             'category_id' => 'required',
-            'price' => 'required|numeric',
+            'purchase_price' => 'required|numeric',
+            'selling_price' => 'required|numeric',
             'stock' => 'required|integer',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -113,7 +119,8 @@ class PimpinanController extends Controller
             'store_id' => $store->id,
             'category_id' => $request->category_id,
             'name' => $request->name,
-            'price' => $request->price,
+            'purchase_price' => $request->purchase_price,
+            'selling_price' => $request->selling_price,
             'stock' => $request->stock,
             'photo' => $photoPath,
         ]);
@@ -126,7 +133,8 @@ class PimpinanController extends Controller
         $request->validate([
             'name' => 'required',
             'category_id' => 'required',
-            'price' => 'required|numeric',
+            'purchase_price' => 'required|numeric',
+            'selling_price' => 'required|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -142,7 +150,8 @@ class PimpinanController extends Controller
         $product->update([
             'category_id' => $request->category_id,
             'name' => $request->name,
-            'price' => $request->price,
+            'purchase_price' => $request->purchase_price,
+            'selling_price' => $request->selling_price,
         ]);
 
         return redirect()->back()->with('success', 'Product updated successfully.');

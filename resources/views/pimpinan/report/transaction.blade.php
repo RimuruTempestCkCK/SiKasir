@@ -25,7 +25,7 @@
 <div class="container-fluid">
     <!-- Summary Cards -->
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-end">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -42,7 +42,31 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="card border-end">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="d-inline-flex align-items-center">
+                                @php
+                                    $totalProfit = $transactions->sum(function($trx) {
+                                        return $trx->details->sum(function($detail) {
+                                            return ($detail->selling_price - $detail->purchase_price) * $detail->quantity;
+                                        });
+                                    });
+                                @endphp
+                                <h2 class="text-primary mb-1 font-weight-medium">Rp {{ number_format($totalProfit, 0, ',', '.') }}</h2>
+                            </div>
+                            <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Total Profit</h6>
+                        </div>
+                        <div class="ms-auto mt-md-3 mt-lg-0">
+                            <span class="opacity-7 text-primary"><i data-feather="trending-up"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
             <div class="card border-end">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -57,7 +81,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -94,7 +118,8 @@
                                     <th>Date</th>
                                     <th>Invoice</th>
                                     <th>Cashier</th>
-                                    <th>Total</th>
+                                    <th>Total Revenue</th>
+                                    <th>Profit</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -108,6 +133,14 @@
                                     <td><span class="badge bg-light text-primary border-primary border">{{ $transaction->invoice_number }}</span></td>
                                     <td>{{ $transaction->cashier->name }}</td>
                                     <td class="font-weight-medium text-dark">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</td>
+                                    <td class="font-weight-medium text-primary">
+                                        @php
+                                            $trxProfit = $transaction->details->sum(function($detail) {
+                                                return ($detail->selling_price - $detail->purchase_price) * $detail->quantity;
+                                            });
+                                        @endphp
+                                        Rp {{ number_format($trxProfit, 0, ',', '.') }}
+                                    </td>
                                     <td class="text-center">
                                         <button class="btn btn-info btn-circle btn-sm" data-bs-toggle="modal" data-bs-target="#detailModal{{ $transaction->id }}">
                                             <i class="fas fa-eye"></i>
@@ -157,7 +190,7 @@
                             <tr>
                                 <td class="font-weight-medium text-dark">{{ $detail->product->name }}</td>
                                 <td class="text-center">{{ $detail->quantity }}</td>
-                                <td class="text-end">{{ number_format($detail->price * $detail->quantity, 0, ',', '.') }}</td>
+                                <td class="text-end">{{ number_format($detail->selling_price * $detail->quantity, 0, ',', '.') }}</td>
                             </tr>
                             @endforeach
                         </tbody>

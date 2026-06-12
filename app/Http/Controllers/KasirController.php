@@ -65,8 +65,8 @@ class KasirController extends Controller
             ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
             ->where('transactions.store_id', $storeId)
             ->whereDate('transactions.created_at', today())
-            ->selectRaw('products.id, products.name, products.price, SUM(transaction_details.quantity) as total_qty, SUM(transaction_details.quantity * transaction_details.price) as revenue')
-            ->groupBy('products.id', 'products.name', 'products.price')
+            ->selectRaw('products.id, products.name, products.selling_price, SUM(transaction_details.quantity) as total_qty, SUM(transaction_details.quantity * transaction_details.selling_price) as revenue')
+            ->groupBy('products.id', 'products.name', 'products.selling_price')
             ->orderBy('revenue', 'desc')
             ->take(5)
             ->get();
@@ -97,7 +97,7 @@ class KasirController extends Controller
 
         foreach ($request->items as $item) {
             $product = Product::findOrFail($item['product_id']);
-            $totalPrice += $product->price * $item['quantity'];
+            $totalPrice += $product->selling_price * $item['quantity'];
         }
 
         if ($request->amount_paid < $totalPrice) {
@@ -126,7 +126,8 @@ class KasirController extends Controller
                     'transaction_id' => $transaction->id,
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
-                    'price' => $product->price,
+                    'purchase_price' => $product->purchase_price,
+                    'selling_price' => $product->selling_price,
                 ]);
 
                 $product->decrement('stock', $item['quantity']);

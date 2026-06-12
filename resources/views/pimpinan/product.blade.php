@@ -58,7 +58,8 @@
                                     <th>Photo</th>
                                     <th>Product Name</th>
                                     <th>Category</th>
-                                    <th>Price</th>
+                                    <th>Harga Modal</th>
+                                    <th>Harga Jual</th>
                                     <th>Stock</th>
                                     <th>Action</th>
                                 </tr>
@@ -75,7 +76,8 @@
                                     </td>
                                     <td>{{ $product->name }}</td>
                                     <td>{{ $product->category->name ?? 'No Category' }}</td>
-                                    <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($product->purchase_price, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($product->selling_price, 0, ',', '.') }}</td>
                                     <td>{{ $product->stock }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-info btn-rounded" data-bs-toggle="modal"
@@ -117,8 +119,12 @@
                                                         </select>
                                                     </div>
                                                     <div class="form-group mb-3">
-                                                        <label class="form-label">Price</label>
-                                                        <input type="number" name="price" class="form-control" value="{{ $product->price }}" required>
+                                                        <label class="form-label">Harga Modal</label>
+                                                        <input type="number" name="purchase_price" class="form-control" value="{{ $product->purchase_price }}" required>
+                                                    </div>
+                                                    <div class="form-group mb-3">
+                                                        <label class="form-label">Harga Jual</label>
+                                                        <input type="number" name="selling_price" class="form-control" value="{{ $product->selling_price }}" required>
                                                     </div>
                                                     <div class="form-group mb-3">
                                                         <label class="form-label">Product Photo</label>
@@ -170,8 +176,12 @@
                             </select>
                         </div>
                         <div class="form-group mb-3">
-                            <label class="form-label">Price</label>
-                            <input type="number" name="price" class="form-control" placeholder="Enter price" required>
+                            <label class="form-label">Harga Modal</label>
+                            <input type="number" name="purchase_price" class="form-control" placeholder="Enter purchase price" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Harga Jual</label>
+                            <input type="number" name="selling_price" class="form-control" placeholder="Enter selling price" required>
                         </div>
                         <div class="form-group mb-3">
                             <label class="form-label">Initial Stock</label>

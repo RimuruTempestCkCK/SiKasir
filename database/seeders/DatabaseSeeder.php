@@ -784,11 +784,13 @@ class DatabaseSeeder extends Seeder
                 ]);
 
                 foreach ($products as $prod) {
+                    $purchasePrice = round($prod['price'] * 0.8);
                     $product = Product::create([
                         'store_id'    => $store->id,
                         'category_id' => $category->id,
                         'name'        => $prod['name'],
-                        'price'       => $prod['price'],
+                        'purchase_price' => $purchasePrice,
+                        'selling_price'  => $prod['price'],
                         'stock'       => $prod['stock'],
                     ]);
 
@@ -828,11 +830,12 @@ class DatabaseSeeder extends Seeder
 
                     foreach ($selectedProducts as $prod) {
                         $qty          = rand(1, 5);
-                        $totalPrice  += $prod->price * $qty;
+                        $totalPrice  += $prod->selling_price * $qty;
                         $transDetails[] = [
                             'product_id' => $prod->id,
                             'quantity'   => $qty,
-                            'price'      => $prod->price,
+                            'purchase_price' => $prod->purchase_price,
+                            'selling_price'  => $prod->selling_price,
                         ];
                         // Kurangi stok (jaga agar tidak minus)
                         if ($prod->stock >= $qty) {
@@ -872,7 +875,8 @@ class DatabaseSeeder extends Seeder
                             'transaction_id' => $transaction->id,
                             'product_id'     => $detail['product_id'],
                             'quantity'       => $detail['quantity'],
-                            'price'          => $detail['price'],
+                            'purchase_price' => $detail['purchase_price'],
+                            'selling_price'  => $detail['selling_price'],
                             'created_at'     => $transTime,
                             'updated_at'     => $transTime,
                         ]);

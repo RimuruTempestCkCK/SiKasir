@@ -232,7 +232,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="border-top-0 text-muted px-2 py-4 font-14">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                                    <td class="border-top-0 text-muted px-2 py-4 font-14">Rp{{ number_format($product->selling_price, 0, ',', '.') }}</td>
                                     <td class="border-top-0 text-center font-weight-medium text-muted px-2 py-4">
                                         {{ $product->total_qty }}
                                     </td>

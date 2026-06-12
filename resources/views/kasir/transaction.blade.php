@@ -38,12 +38,12 @@
                                 @endif
                                 <div class="card-body p-2 text-center">
                                     <h6 class="card-title mb-1">{{ $product->name }}</h6>
-                                    <p class="text-primary font-weight-bold mb-2">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                                    <p class="text-primary font-weight-bold mb-2">Rp {{ number_format($product->selling_price, 0, ',', '.') }}</p>
                                     <p class="small text-muted mb-2">Stock: {{ $product->stock }}</p>
                                     <button class="btn btn-sm btn-primary btn-block btn-rounded add-to-cart"
                                         data-id="{{ $product->id }}"
                                         data-name="{{ $product->name }}"
-                                        data-price="{{ $product->price }}"
+                                        data-price="{{ $product->selling_price }}"
                                         data-stock="{{ $product->stock }}">
                                         Add to Cart
                                     </button>

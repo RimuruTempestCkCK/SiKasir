@@ -74,8 +74,8 @@
                                                                 <tr>
                                                                     <td>{{ $detail->product->name }}</td>
                                                                     <td>{{ $detail->quantity }}</td>
-                                                                    <td class="text-end">{{ number_format($detail->price, 0, ',', '.') }}</td>
-                                                                    <td class="text-end">{{ number_format($detail->quantity * $detail->price, 0, ',', '.') }}</td>
+                                                                    <td class="text-end">{{ number_format($detail->selling_price, 0, ',', '.') }}</td>
+                                                                    <td class="text-end">{{ number_format($detail->quantity * $detail->selling_price, 0, ',', '.') }}</td>
                                                                 </tr>
                                                                 @endforeach
                                                             </tbody>
