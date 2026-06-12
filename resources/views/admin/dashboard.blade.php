@@ -96,7 +96,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Stores by Type</h4>
-                    <div id="admin-donut-chart" class="mt-2" style="height:283px; width:100%;"></div>
+                    <div id="campaign-v2" class="mt-2" style="height:283px; width:100%;"></div>
                     <ul class="list-style-none mb-0">
                         @foreach($storesByCategory->take(5) as $index => $cat)
                         <li class="{{ $index > 0 ? 'mt-3' : '' }}">
@@ -237,12 +237,12 @@
     </div>
 </div>
 
-<script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
+@push('scripts')
 <script>
 $(function () {
     // 1. Donut Chart
     var donutChart = c3.generate({
-        bindto: '#admin-donut-chart',
+        bindto: '#campaign-v2',
         data: {
             columns: [
                 @foreach($storesByCategory as $cat)
@@ -261,6 +261,7 @@ $(function () {
             pattern: ['#5f76e8', '#ff4f70', '#01caf1', '#22ca80', '#ffad46']
         }
     });
+    d3.select('#campaign-v2 .c3-chart-arcs-title').style('font-family', 'Rubik');
 
     // 2. Bar Chart
     new Chartist.Bar('.net-income', {
@@ -269,19 +270,57 @@ $(function () {
     }, {
         low: 0,
         showArea: true,
-        plugins: [Chartist.plugins.tooltip()]
+        plugins: [Chartist.plugins.tooltip()],
+        axisX: { showGrid: false }
     });
 
     // 3. Area Chart
-    new Chartist.Line('.stats', {
+    var areaChart = new Chartist.Line('.stats', {
         labels: [@foreach($dailyStats as $ds) '{{ \Carbon\Carbon::parse($ds->date)->format('d M') }}', @endforeach],
         series: [[@foreach($dailyStats as $ds) {{ $ds->total }}, @endforeach]]
     }, {
         low: 0,
         showArea: true,
         fullWidth: true,
-        plugins: [Chartist.plugins.tooltip()]
+        plugins: [Chartist.plugins.tooltip()],
+        axisY: {
+            onlyInteger: true,
+            offset: 30,
+            labelInterpolationFnc: function (value) {
+                return (value >= 1000) ? (value / 1000) + 'k' : value;
+            }
+        }
+    });
+
+    areaChart.on('draw', function (ctx) {
+        if (ctx.type === 'area') {
+            ctx.element.attr({
+                x1: ctx.x1 + 0.001
+            });
+        }
+    });
+
+    areaChart.on('created', function (ctx) {
+        var defs = ctx.svg.elem('defs');
+        defs.elem('linearGradient', {
+            id: 'gradient',
+            x1: 0,
+            y1: 1,
+            x2: 0,
+            y2: 0
+        }).elem('stop', {
+            offset: 0,
+            'stop-color': 'rgba(255, 255, 255, 1)'
+        }).parent().elem('stop', {
+            offset: 1,
+            'stop-color': 'rgba(80, 153, 255, 1)'
+        });
+    });
+
+    $(window).on('resize', function () {
+        areaChart.update();
     });
 });
 </script>
+@endpush
 @endsection

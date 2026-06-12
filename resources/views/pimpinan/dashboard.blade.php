@@ -249,7 +249,7 @@
     </div>
 </div>
 
-<script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
+@push('scripts')
 <script>
 $(function () {
     // 1. Category Donut Chart
@@ -274,6 +274,7 @@ $(function () {
             pattern: ['#5f76e8', '#ff4f70', '#01caf1', '#22ca80', '#ffad46']
         }
     });
+    d3.select('#campaign-v2 .c3-chart-arcs-title').style('font-family', 'Rubik');
 
     // 2. Monthly Revenue Bar Chart
     var barChart = new Chartist.Bar('.net-income', {
@@ -282,7 +283,8 @@ $(function () {
     }, {
         low: 0,
         showArea: true,
-        plugins: [Chartist.plugins.tooltip()]
+        plugins: [Chartist.plugins.tooltip()],
+        axisX: { showGrid: false }
     });
 
     // 3. Daily Stats Area Chart
@@ -293,8 +295,45 @@ $(function () {
         low: 0,
         showArea: true,
         fullWidth: true,
-        plugins: [Chartist.plugins.tooltip()]
+        plugins: [Chartist.plugins.tooltip()],
+        axisY: {
+            onlyInteger: true,
+            offset: 30,
+            labelInterpolationFnc: function (value) {
+                return (value >= 1000) ? (value / 1000) + 'k' : value;
+            }
+        }
+    });
+
+    areaChart.on('draw', function (ctx) {
+        if (ctx.type === 'area') {
+            ctx.element.attr({
+                x1: ctx.x1 + 0.001
+            });
+        }
+    });
+
+    areaChart.on('created', function (ctx) {
+        var defs = ctx.svg.elem('defs');
+        defs.elem('linearGradient', {
+            id: 'gradient',
+            x1: 0,
+            y1: 1,
+            x2: 0,
+            y2: 0
+        }).elem('stop', {
+            offset: 0,
+            'stop-color': 'rgba(255, 255, 255, 1)'
+        }).parent().elem('stop', {
+            offset: 1,
+            'stop-color': 'rgba(80, 153, 255, 1)'
+        });
+    });
+
+    $(window).on('resize', function () {
+        areaChart.update();
     });
 });
 </script>
+@endpush
 @endsection

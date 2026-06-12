@@ -103,7 +103,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Today's Sales by Category</h4>
-                    <div id="kasir-donut-chart" class="mt-2" style="height:283px; width:100%;"></div>
+                    <div id="campaign-v2" class="mt-2" style="height:283px; width:100%;"></div>
                     <ul class="list-style-none mb-0">
                         @foreach($salesByCategory->take(5) as $index => $cat)
                         <li class="{{ $index > 0 ? 'mt-3' : '' }}">
@@ -112,6 +112,13 @@
                             <span class="text-dark float-end font-weight-medium">Rp{{ number_format($cat->total, 0, ',', '.') }}</span>
                         </li>
                         @endforeach
+                        @if($salesByCategory->isEmpty())
+                        <li>
+                            <i class="fas fa-circle text-muted font-10 me-2"></i>
+                            <span class="text-muted">No sales today</span>
+                            <span class="text-dark float-end font-weight-medium">Rp0</span>
+                        </li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -139,7 +146,7 @@
                         <div class="col-5">
                             <div class="progress" style="height: 5px;">
                                 <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(($todaySales / $goal) * 100, 100) }}%"
-                                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                    aria-valuenow="{{ min(($todaySales / $goal) * 100, 100) }}" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                         <div class="col-3 text-end">
@@ -185,6 +192,9 @@
                             </div>
                         </div>
                         @endforeach
+                        @if($recentTransactions->isEmpty())
+                        <p class="text-muted text-center">No recent activity</p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -216,7 +226,7 @@
                                 <tr>
                                     <td class="border-top-0 px-2 py-4">
                                         <div class="d-flex no-block align-items-center">
-                                            <div class="me-3"><img src="{{ asset('assets/images/big/icon.png') }}" alt="user" class="rounded-circle" width="45" height="45" /></div>
+                                            <div class="me-3"><img src="{{ asset('assets/images/big/icon.png') }}" alt="product" class="rounded-circle" width="45" height="45" /></div>
                                             <div class="">
                                                 <h5 class="text-dark mb-0 font-16 font-weight-medium">{{ $product->name }}</h5>
                                             </div>
@@ -231,6 +241,11 @@
                                     </td>
                                 </tr>
                                 @endforeach
+                                @if($topProducts->isEmpty())
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No products sold today</td>
+                                </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -240,20 +255,24 @@
     </div>
 </div>
 
-<script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
+@push('scripts')
 <script>
 $(function () {
     // 1. Donut Chart
-    @if($salesByCategory->isNotEmpty())
     var donutChart = c3.generate({
-        bindto: '#kasir-donut-chart',
+        bindto: '#campaign-v2',
         data: {
             columns: [
+                @if($salesByCategory->isEmpty())
+                ['No Sales', 1],
+                @else
                 @foreach($salesByCategory as $cat)
                 ['{{ $cat->category }}', {{ $cat->total }}],
                 @endforeach
+                @endif
             ],
-            type: 'donut'
+            type: 'donut',
+            tooltip: { show: true }
         },
         donut: {
             label: { show: false },
@@ -265,7 +284,7 @@ $(function () {
             pattern: ['#5f76e8', '#ff4f70', '#01caf1', '#22ca80', '#ffad46']
         }
     });
-    @endif
+    d3.select('#campaign-v2 .c3-chart-arcs-title').style('font-family', 'Rubik');
 
     // 2. Bar Chart
     @if($hourlySales->isNotEmpty())
@@ -275,22 +294,60 @@ $(function () {
     }, {
         low: 0,
         showArea: true,
-        plugins: [Chartist.plugins.tooltip()]
+        plugins: [Chartist.plugins.tooltip()],
+        axisX: { showGrid: false }
     });
     @endif
 
     // 3. Area Chart
     @if($salesDaily->isNotEmpty())
-    new Chartist.Line('.stats', {
+    var areaChart = new Chartist.Line('.stats', {
         labels: [@foreach($salesDaily as $sd) '{{ \Carbon\Carbon::parse($sd->date)->format('d M') }}', @endforeach],
         series: [[@foreach($salesDaily as $sd) {{ $sd->total }}, @endforeach]]
     }, {
         low: 0,
         showArea: true,
         fullWidth: true,
-        plugins: [Chartist.plugins.tooltip()]
+        plugins: [Chartist.plugins.tooltip()],
+        axisY: {
+            onlyInteger: true,
+            offset: 30,
+            labelInterpolationFnc: function (value) {
+                return (value >= 1000) ? (value / 1000) + 'k' : value;
+            }
+        }
+    });
+
+    areaChart.on('draw', function (ctx) {
+        if (ctx.type === 'area') {
+            ctx.element.attr({
+                x1: ctx.x1 + 0.001
+            });
+        }
+    });
+
+    areaChart.on('created', function (ctx) {
+        var defs = ctx.svg.elem('defs');
+        defs.elem('linearGradient', {
+            id: 'gradient',
+            x1: 0,
+            y1: 1,
+            x2: 0,
+            y2: 0
+        }).elem('stop', {
+            offset: 0,
+            'stop-color': 'rgba(255, 255, 255, 1)'
+        }).parent().elem('stop', {
+            offset: 1,
+            'stop-color': 'rgba(80, 153, 255, 1)'
+        });
+    });
+
+    $(window).on('resize', function () {
+        areaChart.update();
     });
     @endif
 });
 </script>
+@endpush
 @endsection
