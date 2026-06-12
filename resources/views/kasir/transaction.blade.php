@@ -102,6 +102,10 @@
                     <div class="modal-body text-center">
                         <h2 class="mb-4">Total: <span id="modalTotalText">Rp 0</span></h2>
                         <input type="hidden" id="modalTotalInput" name="total_price">
+                        <div class="form-group mb-3 text-start">
+                            <label class="form-label">Transaction Date (Optional - fill if late)</label>
+                            <input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d') }}">
+                        </div>
                         <div class="form-group mb-3">
                             <label class="form-label">Amount Paid</label>
                             <input type="number" name="amount_paid" id="amountPaid" class="form-control form-control-lg text-center" placeholder="0" required autofocus>

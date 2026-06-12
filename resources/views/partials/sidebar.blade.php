@@ -78,6 +78,9 @@
                 <li class="sidebar-item"> <a class="sidebar-link sidebar-link" href="{{ url('/kasir/transaction') }}"
                         aria-expanded="false"><i data-feather="shopping-cart" class="feather-icon"></i><span
                             class="hide-menu">Sales Transaction</span></a></li>
+                <li class="sidebar-item"> <a class="sidebar-link sidebar-link" href="{{ url('/kasir/history') }}"
+                        aria-expanded="false"><i data-feather="list" class="feather-icon"></i><span
+                            class="hide-menu">Transaction History</span></a></li>
                 <li class="sidebar-item"> <a class="sidebar-link sidebar-link" href="{{ url('/kasir/stock') }}"
                         aria-expanded="false"><i data-feather="search" class="feather-icon"></i><span
                             class="hide-menu">Monitor Stock</span></a></li>

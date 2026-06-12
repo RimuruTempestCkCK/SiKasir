@@ -89,6 +89,7 @@ class KasirController extends Controller
         $request->validate([
             'items' => 'required|array',
             'amount_paid' => 'required|numeric',
+            'transaction_date' => 'nullable|date',
         ]);
 
         $storeId = Auth::user()->store_id;
@@ -106,6 +107,8 @@ class KasirController extends Controller
         try {
             DB::beginTransaction();
 
+            $createdAt = $request->transaction_date ? $request->transaction_date . ' ' . date('H:i:s') : now();
+
             $transaction = Transaction::create([
                 'store_id' => $storeId,
                 'user_id' => Auth::id(),
@@ -113,6 +116,7 @@ class KasirController extends Controller
                 'total_price' => $totalPrice,
                 'amount_paid' => $request->amount_paid,
                 'change' => $request->amount_paid - $totalPrice,
+                'created_at' => $createdAt,
             ]);
 
             foreach ($request->items as $item) {
@@ -134,6 +138,18 @@ class KasirController extends Controller
             DB::rollBack();
             return redirect()->back()->withErrors(['msg' => 'Error: ' . $e->getMessage()]);
         }
+    }
+
+    public function history()
+    {
+        $storeId = Auth::user()->store_id;
+        $transactions = Transaction::where('store_id', $storeId)
+            ->where('user_id', Auth::id())
+            ->with('details.product')
+            ->latest()
+            ->paginate(10);
+            
+        return view('kasir.history', compact('transactions'));
     }
 
     public function stock()

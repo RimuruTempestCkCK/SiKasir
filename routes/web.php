@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [KasirController::class, 'dashboard']);
         Route::get('/transaction', [KasirController::class, 'transaction']);
         Route::post('/transaction', [KasirController::class, 'transactionStore'])->name('kasir.transaction.store');
+        Route::get('/history', [KasirController::class, 'history'])->name('kasir.history');
         Route::get('/stock', [KasirController::class, 'stock']);
     });
 
