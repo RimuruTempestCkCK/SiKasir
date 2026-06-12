@@ -10,7 +10,7 @@
             <div class="navbar-brand">
                 <!-- Logo icon -->
                 <a href="{{ url('/') }}" class="d-flex align-items-center">
-                    <img src="{{ asset('assets/images/sikasir_logo-nobg.png') }}" alt="SiKasir" class="img-fluid">
+                    <img src="{{ asset('assets/images/sikasir_new.png') }}" alt="SiKasir" class="img-fluid">
                     <!-- <span class="ms-2 font-weight-medium text-dark h4 mb-0">SiKasir</span> -->
                 </a>
             </div>
