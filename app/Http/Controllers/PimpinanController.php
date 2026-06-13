@@ -250,30 +250,53 @@ class PimpinanController extends Controller
         return redirect()->back()->with('success', 'Stock added successfully.');
     }
 
-    public function reportTransaction()
+    public function reportTransaction(Request $request)
     {
         $store = Auth::user()->ownedStore;
-        $transactions = Transaction::where('store_id', $store->id)
-            ->with(['cashier', 'details.product'])
+        $query = Transaction::where('store_id', $store->id);
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        $transactions = $query->with(['cashier', 'details.product'])
             ->latest()
             ->get();
-        return view('pimpinan.report.transaction', compact('transactions'));
+
+        return view('pimpinan.report.transaction', compact('transactions', 'startDate', 'endDate'));
     }
 
-    public function reportStock()
+    public function reportStock(Request $request)
     {
         $store = Auth::user()->ownedStore;
-        $stockLogs = StockLog::whereHas('product', function ($query) use ($store) {
-            $query->where('store_id', $store->id);
-        })
-        ->with('product')
-        ->latest()
-        ->get();
+        $query = StockLog::whereHas('product', function ($q) use ($store) {
+            $q->where('store_id', $store->id);
+        });
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        $stockLogs = $query->with('product')
+            ->latest()
+            ->get();
 
         $totalStockIn = $stockLogs->where('type', 'in')->sum('quantity');
         $totalStockOut = $stockLogs->where('type', 'out')->sum('quantity');
         $lowStockProducts = Product::where('store_id', $store->id)->where('stock', '<=', 10)->count();
 
-        return view('pimpinan.report.stock', compact('stockLogs', 'totalStockIn', 'totalStockOut', 'lowStockProducts'));
+        return view('pimpinan.report.stock', compact('stockLogs', 'totalStockIn', 'totalStockOut', 'lowStockProducts', 'startDate', 'endDate'));
     }
 }

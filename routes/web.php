@@ -49,8 +49,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/stock', [PimpinanController::class, 'stock']);
         Route::post('/stock', [PimpinanController::class, 'stockAdd'])->name('pimpinan.stock.add');
-        Route::get('/report/transaction', [PimpinanController::class, 'reportTransaction']);
-        Route::get('/report/stock', [PimpinanController::class, 'reportStock']);
+        Route::get('/report/transaction', [PimpinanController::class, 'reportTransaction'])->name('pimpinan.report.transaction');
+        Route::get('/report/stock', [PimpinanController::class, 'reportStock'])->name('pimpinan.report.stock');
     });
 
     // Kasir Routes

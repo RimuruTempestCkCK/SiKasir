@@ -23,6 +23,37 @@
 </div>
 
 <div class="container-fluid">
+    <!-- Filter Card -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-3"><i class="fas fa-filter me-2"></i>Filter Report</h4>
+                    <form action="{{ route('pimpinan.report.transaction') }}" method="GET">
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <label class="form-label font-weight-medium">Start Date</label>
+                                <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <label class="form-label font-weight-medium">End Date</label>
+                                <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary btn-rounded shadow-sm px-4">
+                                    <i class="fas fa-search me-2"></i>Filter
+                                </button>
+                                <a href="{{ route('pimpinan.report.transaction') }}" class="btn btn-light btn-rounded px-4 ms-2">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="row">
         <div class="col-md-3">
