@@ -119,7 +119,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table id="zero_config" class="table table-striped table-bordered no-wrap">
+                        <table id="report_table" class="table table-striped table-bordered no-wrap">
                             <thead>
                                 <tr>
                                     <th>Date</th>
@@ -153,6 +153,9 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="mt-4">
+                        {{ $stockLogs->links() }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,8 +168,11 @@
     <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
     <script>
         $(function () {
-            $('#zero_config').DataTable({
-                "order": [[ 0, "desc" ]] // Sort by date descending
+            $('#report_table').DataTable({
+                "paging": false,
+                "info": false,
+                "searching": false,
+                "ordering": false
             });
         });
     </script>

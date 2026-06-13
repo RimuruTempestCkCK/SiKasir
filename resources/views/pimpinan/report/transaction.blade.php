@@ -62,7 +62,7 @@
                     <div class="d-flex align-items-center">
                         <div>
                             <div class="d-inline-flex align-items-center">
-                                <h2 class="text-dark mb-1 font-weight-medium">Rp {{ number_format($transactions->sum('total_price'), 0, ',', '.') }}</h2>
+                                <h2 class="text-dark mb-1 font-weight-medium">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h2>
                             </div>
                             <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Total Revenue</h6>
                         </div>
@@ -79,13 +79,6 @@
                     <div class="d-flex align-items-center">
                         <div>
                             <div class="d-inline-flex align-items-center">
-                                @php
-                                    $totalProfit = $transactions->sum(function($trx) {
-                                        return $trx->details->sum(function($detail) {
-                                            return ($detail->selling_price - $detail->purchase_price) * $detail->quantity;
-                                        });
-                                    });
-                                @endphp
                                 <h2 class="text-primary mb-1 font-weight-medium">Rp {{ number_format($totalProfit, 0, ',', '.') }}</h2>
                             </div>
                             <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Total Profit</h6>
@@ -102,7 +95,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
-                            <h2 class="text-dark mb-1 font-weight-medium">{{ $transactions->count() }}</h2>
+                            <h2 class="text-dark mb-1 font-weight-medium">{{ $totalTransactionsCount }}</h2>
                             <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Total Transactions</h6>
                         </div>
                         <div class="ms-auto mt-md-3 mt-lg-0">
@@ -143,7 +136,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table id="zero_config" class="table table-striped table-bordered no-wrap">
+                        <table id="report_table" class="table table-striped table-bordered no-wrap">
                             <thead>
                                 <tr>
                                     <th>Date</th>
@@ -181,6 +174,9 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-4">
+                        {{ $transactions->links() }}
                     </div>
                 </div>
             </div>
@@ -257,8 +253,11 @@
     <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
     <script>
         $(function () {
-            $('#zero_config').DataTable({
-                "order": [[ 0, "desc" ]] // Sort by date descending
+            $('#report_table').DataTable({
+                "paging": false,      // Matikan paging DataTable karena pakai Pagination Laravel
+                "info": false,        // Matikan info bar
+                "searching": false,   // Matikan pencarian client-side (agar tidak lag)
+                "ordering": false     // Matikan sorting client-side (agar tidak lag)
             });
         });
     </script>

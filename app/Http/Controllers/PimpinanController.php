@@ -265,11 +265,32 @@ class PimpinanController extends Controller
             ]);
         }
 
+        // Clone query for summary totals before pagination
+        $summaryQuery = clone $query;
+        $totalRevenue = $summaryQuery->sum('total_price');
+        $totalTransactionsCount = $summaryQuery->count();
+        
+        // Manual profit calculation for filtered data to keep it efficient
+        $totalProfit = TransactionDetail::join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->where('transactions.store_id', $store->id)
+            ->when($startDate && $endDate, function($q) use ($startDate, $endDate) {
+                return $q->whereBetween('transactions.created_at', [
+                    \Carbon\Carbon::parse($startDate)->startOfDay(),
+                    \Carbon\Carbon::parse($endDate)->endOfDay()
+                ]);
+            })
+            ->selectRaw('SUM((transaction_details.selling_price - transaction_details.purchase_price) * transaction_details.quantity) as profit')
+            ->first()->profit ?: 0;
+
         $transactions = $query->with(['cashier', 'details.product'])
             ->latest()
-            ->get();
+            ->paginate(50)
+            ->withQueryString(); // Keep filter parameters when clicking next page
 
-        return view('pimpinan.report.transaction', compact('transactions', 'startDate', 'endDate'));
+        return view('pimpinan.report.transaction', compact(
+            'transactions', 'startDate', 'endDate', 
+            'totalRevenue', 'totalProfit', 'totalTransactionsCount'
+        ));
     }
 
     public function reportStock(Request $request)
@@ -289,14 +310,23 @@ class PimpinanController extends Controller
             ]);
         }
 
-        $stockLogs = $query->with('product')
-            ->latest()
-            ->get();
-
-        $totalStockIn = $stockLogs->where('type', 'in')->sum('quantity');
-        $totalStockOut = $stockLogs->where('type', 'out')->sum('quantity');
+        // Clone for summary calculations
+        $summaryQuery = clone $query;
+        $totalStockIn = $summaryQuery->where('type', 'in')->sum('quantity');
+        
+        $summaryQueryOut = clone $query;
+        $totalStockOut = $summaryQueryOut->where('type', 'out')->sum('quantity');
+        
         $lowStockProducts = Product::where('store_id', $store->id)->where('stock', '<=', 10)->count();
 
-        return view('pimpinan.report.stock', compact('stockLogs', 'totalStockIn', 'totalStockOut', 'lowStockProducts', 'startDate', 'endDate'));
+        $stockLogs = $query->with('product')
+            ->latest()
+            ->paginate(50)
+            ->withQueryString();
+
+        return view('pimpinan.report.stock', compact(
+            'stockLogs', 'totalStockIn', 'totalStockOut', 'lowStockProducts', 
+            'startDate', 'endDate'
+        ));
     }
 }
