@@ -690,143 +690,141 @@ class DatabaseSeeder extends Seeder
             // =============================================
             // 4. GENERATE MASSIVE PRODUCTS
             // =============================================
-            $allProducts = collect();
+            $allProductsData = [];
+            $categoriesInStore = [];
 
             // A. Manual Products from Array
             foreach ($data['categories'] as $catName => $products) {
-                $category = Category::firstOrCreate(
-                    ['store_id' => $store->id, 'name' => $catName]
-                );
+                $category = Category::firstOrCreate(['store_id' => $store->id, 'name' => $catName]);
+                $categoriesInStore[$catName] = $category->id;
 
                 foreach ($products as $prod) {
-                    $product = Product::where('store_id', $store->id)
-                                     ->where('name', $prod['name'])
-                                     ->first();
-
-                    if (!$product) {
+                    $exists = Product::where('store_id', $store->id)->where('name', $prod['name'])->exists();
+                    if (!$exists) {
                         $purchasePrice = $prod['purchase_price'] ?? round($prod['price'] * 0.8);
-                        $product = Product::create([
-                            'store_id'    => $store->id,
-                            'category_id' => $category->id,
-                            'name'        => $prod['name'],
+                        $allProductsData[] = [
+                            'store_id'       => $store->id,
+                            'category_id'    => $category->id,
+                            'name'           => $prod['name'],
                             'purchase_price' => $purchasePrice,
                             'selling_price'  => $prod['price'],
-                            'stock'       => $prod['stock'],
-                        ]);
-
-                        StockLog::create([
-                            'product_id' => $product->id,
-                            'type'       => 'in',
-                            'quantity'   => $prod['stock'],
-                            'note'       => 'Stok awal (Manual)',
-                            'created_at' => Carbon::now()->subDays(365),
-                            'updated_at' => Carbon::now()->subDays(365),
-                        ]);
+                            'stock'          => $prod['stock'],
+                            'created_at'     => Carbon::now()->subDays(365),
+                            'updated_at'     => Carbon::now()->subDays(365),
+                        ];
                     }
-                    $allProducts->push($product);
                 }
             }
 
-            // B. Auto-Generated Additional Products (Ensuring 200+ Products per store)
-            $currentProdCount = $allProducts->count();
+            // B. Auto-Generated Additional Products
+            $currentTotal = count($allProductsData) + Product::where('store_id', $store->id)->count();
             $targetCount = 200;
 
-            if ($currentProdCount < $targetCount) {
-                $extraCat = Category::firstOrCreate(['store_id' => $store->id, 'name' => 'Koleksi Umum']);
+            if ($currentTotal < $targetCount) {
+                $pool = [
+                    'Sembako' => [
+                        'Sabun' => ['Lifebuoy 80gr', 'Lux Soft Touch 85gr', 'Giv White 80gr', 'Biore Guard 80gr', 'Dettol Original 100gr', 'Nuvo Family 80gr'],
+                        'Sampo' => ['Sunsilk Soft 170ml', 'Pantene Black 160ml', 'Clear Ice Cool 160ml', 'Dove Hair Fall 160ml', 'Zinc Anti Dandruff 170ml'],
+                        'Deterjen' => ['Rinso Molto 800gr', 'So Klin Liquid 750ml', 'Attack Jaz1 850gr', 'Daia Putih 850gr', 'Boom Deterjen 800gr'],
+                        'Snack' => ['Chitato Sapi Panggang', 'Qtela Singkong 185gr', 'Taro Net Seaweed', 'Kusuka Keripik 180gr', 'Oreo Vanilla 133gr', 'Silverqueen Almond 65gr', 'Beng-beng Share It', 'Pocky Chocolate'],
+                        'Minuman' => ['Teh Pucuk Harum 350ml', 'Aqua Botol 1500ml', 'Mizone Blue 500ml', 'You C1000 Orange', 'Kopi Kapal Api 165gr', 'Luwak White Koffie 10s'],
+                        'Bumbu' => ['Masako Ayam 250gr', 'Royco Sapi 230gr', 'Sasa MSG 250gr', 'Garam Refina 500gr', 'Kecap Bango 550ml', 'Saus ABC Sambal 335ml'],
+                    ],
+                    'Elektronik' => [
+                        'Aksesori' => ['MicroSD Sandisk 32GB', 'Flashdisk Kingston 64GB', 'Baterai ABC Alkaline AA', 'Mousepad Gaming XL', 'Ring Light 26cm', 'Tripod HP 1m'],
+                        'Kabel' => ['HDMI Cable 2m', 'AUX Cable 3.5mm', 'Extension Plug 3 Socket', 'VGA to HDMI Converter'],
+                    ],
+                    'Fashion' => [
+                        'Atasan' => ['Kaos Polos Cotton Combed', 'Kemeja Flanel Kotak', 'Jaket Hoodie Polos', 'Sweater Rajut Wanita'],
+                        'Bawahan' => ['Celana Jeans Denim', 'Celana Kulot Linen', 'Legging Spandex', 'Celana Pendek Chino'],
+                    ],
+                    'Obat' => [
+                        'Suplemen' => ['Vitamin D3 1000IU', 'C-1000 mg 10 Tablet', 'Minyak Ikan Omega 3', 'Madu TJ Kurma'],
+                        'P3K' => ['Hanyaplast 10s', 'Betadine 15ml', 'Alkohol 70% 100ml', 'Kapas Wajah 50gr'],
+                    ],
+                ];
 
-                for ($i = $currentProdCount + 1; $i <= $targetCount; $i++) {
-                    $prodName = "Produk Unggulan " . str_pad($i, 3, '0', STR_PAD_LEFT);
+                $selectedPool = $pool['Sembako'];
+                if (str_contains($data['name'], 'Teknologi')) $selectedPool = $pool['Elektronik'];
+                if (str_contains($data['name'], 'Fashion') || str_contains($data['name'], 'Butik')) $selectedPool = $pool['Fashion'];
+                if (str_contains($data['name'], 'Sehat') || str_contains($data['name'], 'Apotek')) $selectedPool = $pool['Obat'];
 
-                    $product = Product::where('store_id', $store->id)
-                                     ->where('name', $prodName)
-                                     ->first();
+                for ($i = $currentTotal + 1; $i <= $targetCount; $i++) {
+                    $catName = array_rand($selectedPool);
+                    $categoryId = $categoriesInStore[$catName] ?? Category::firstOrCreate(['store_id' => $store->id, 'name' => $catName])->id;
+                    $categoriesInStore[$catName] = $categoryId;
 
-                    if (!$product) {
-                        $randomPrice = rand(10, 500) * 1000;
-                        $purchasePrice = round($randomPrice * rand(70, 85) / 100);
+                    $itemPool = $selectedPool[$catName];
+                    $prodName = $itemPool[array_rand($itemPool)] . " (V" . str_pad($i, 2, '0', STR_PAD_LEFT) . ")";
 
-                        $product = Product::create([
-                            'store_id'    => $store->id,
-                            'category_id' => $extraCat->id,
-                            'name'        => $prodName,
-                            'purchase_price' => $purchasePrice,
-                            'selling_price'  => $randomPrice,
-                            'stock'       => rand(50, 500),
-                        ]);
-
-                        StockLog::create([
-                            'product_id' => $product->id,
-                            'type'       => 'in',
-                            'quantity'   => $product->stock,
-                            'note'       => 'Stok awal (Auto)',
-                            'created_at' => Carbon::now()->subDays(365),
-                        ]);
-                    }
-                    $allProducts->push($product);
+                    $allProductsData[] = [
+                        'store_id'       => $store->id,
+                        'category_id'    => $categoryId,
+                        'name'           => $prodName,
+                        'purchase_price' => rand(5, 100) * 1000,
+                        'selling_price'  => rand(110, 150) * 1000,
+                        'stock'          => rand(100, 500),
+                        'created_at'     => Carbon::now()->subDays(365),
+                        'updated_at'     => Carbon::now()->subDays(365),
+                    ];
                 }
             }
 
+            // Bulk Insert Products
+            foreach (array_chunk($allProductsData, 100) as $chunk) {
+                Product::insert($chunk);
+            }
+
+            // Get all products in store for transaction seeding
+            $products = Product::where('store_id', $store->id)->get();
+            $allProductIds = $products->pluck('id')->toArray();
+            
             // =============================================
             // 5. CREATE MASSIVE TRANSACTIONS (365 HARI)
             // =============================================
-            // Check existing transaction count to decide if we need more
             $existingTransCount = Transaction::where('store_id', $store->id)->count();
 
-            if ($existingTransCount < 10000) {
-                // Seed for the last year
+            if ($existingTransCount < 5000) { 
+                $transactionsToInsert = [];
+                $detailsToInsert = [];
+                $invoiceCounter = $existingTransCount + 1;
+
                 for ($d = 365; $d >= 0; $d--) {
                     $date = Carbon::now()->subDays($d);
-
-                    // High frequency on weekends and specific dates
                     $isWeekend = $date->isWeekend();
-                    $isPayday  = ($date->day >= 25 || $date->day <= 5);
+                    $dailyTransCount = $isWeekend ? rand(15, 30) : rand(5, 15);
 
-                    $baseCount = $isWeekend ? rand(40, 80) : rand(20, 40);
-                    if ($isPayday) $baseCount = round($baseCount * 1.5);
-
-                    for ($t = 1; $t <= $baseCount; $t++) {
+                    for ($t = 1; $t <= $dailyTransCount; $t++) {
                         $cashier = $kasirs[array_rand($kasirs)];
+                        $transTime = $date->copy()->addHours(rand(8, 21))->addMinutes(rand(0, 59));
+                        
+                        $numItems = rand(1, 5);
+                        $selectedProds = $products->random(min($numItems, $products->count()));
+                        
+                        $totalPrice = 0;
+                        $tempDetails = [];
 
-                        // Select random items (1-15 items per transaction)
-                        $selectedProducts = $allProducts->random(rand(1, min(15, $allProducts->count())));
-
-                        $transDetails = [];
-                        $totalPrice   = 0;
-
-                        foreach ($selectedProducts as $prod) {
-                            $qty          = rand(1, 5);
-                            $totalPrice  += $prod->selling_price * $qty;
-                            $transDetails[] = [
-                                'product_id' => $prod->id,
-                                'quantity'   => $qty,
+                        foreach ($selectedProds as $prod) {
+                            $qty = rand(1, 3);
+                            $totalPrice += $prod->selling_price * $qty;
+                            $tempDetails[] = [
+                                'product_id'     => $prod->id,
+                                'quantity'       => $qty,
                                 'purchase_price' => $prod->purchase_price,
                                 'selling_price'  => $prod->selling_price,
+                                'created_at'     => $transTime,
+                                'updated_at'     => $transTime,
                             ];
-                            // Visual only decrement, in real seeder we don't want to exhaust stock too fast
-                            if ($prod->stock > 5) {
-                                $prod->decrement('stock', $qty);
-                            }
                         }
 
-                        $amountPaid = (int) (ceil($totalPrice / 1000) * 1000);
-                        if ($amountPaid < $totalPrice) $amountPaid += 5000; // Realistic paid amount
+                        $amountPaid = ceil($totalPrice / 1000) * 1000;
+                        if ($amountPaid < $totalPrice) $amountPaid += 1000;
 
-                        $transTime = $date->copy()
-                            ->addHours(rand(7, 23))
-                            ->addMinutes(rand(0, 59))
-                            ->addSeconds(rand(0, 59));
-
-                        $invoiceNumber = 'INV-'
-                            . str_pad($store->id, 2, '0', STR_PAD_LEFT)
-                            . '-' . $date->format('Ymd')
-                            . '-' . str_pad($t + $existingTransCount, 6, '0', STR_PAD_LEFT);
-
-                        // Use create for performance, but only if we haven't seeded this day heavily yet
-                        // To keep it simple and safe for "don't delete", we just add them.
-                        $transaction = Transaction::create([
+                        // Insert transaction and get ID
+                        $transactionId = \DB::table('transactions')->insertGetId([
                             'store_id'       => $store->id,
                             'user_id'        => $cashier->id,
-                            'invoice_number' => $invoiceNumber,
+                            'invoice_number' => 'INV-' . $store->id . '-' . $date->format('Ymd') . '-' . str_pad($invoiceCounter++, 5, '0', STR_PAD_LEFT),
                             'total_price'    => $totalPrice,
                             'amount_paid'    => $amountPaid,
                             'change'         => $amountPaid - $totalPrice,
@@ -834,42 +832,32 @@ class DatabaseSeeder extends Seeder
                             'updated_at'     => $transTime,
                         ]);
 
-                        foreach ($transDetails as $detail) {
-                            TransactionDetail::create([
-                                'transaction_id' => $transaction->id,
-                                'product_id'     => $detail['product_id'],
-                                'quantity'       => $detail['quantity'],
-                                'purchase_price' => $detail['purchase_price'],
-                                'selling_price'  => $detail['selling_price'],
-                                'created_at'     => $transTime,
-                                'updated_at'     => $transTime,
-                            ]);
+                        foreach ($tempDetails as $detail) {
+                            $detail['transaction_id'] = $transactionId;
+                            $detailsToInsert[] = $detail;
+                        }
+
+                        // Bulk insert details every 500 rows to keep memory low
+                        if (count($detailsToInsert) >= 500) {
+                            \DB::table('transaction_details')->insert($detailsToInsert);
+                            $detailsToInsert = [];
                         }
                     }
                 }
-            }
-
-            // =============================================
-            // 6. AUTO-RESTOCK LOGIC
-            // =============================================
-            foreach ($allProducts as $prod) {
-                if ($prod->stock < 50) {
-                    $restockQty  = rand(300, 1000);
-                    $restockDate = Carbon::now();
-
-                    StockLog::create([
-                        'product_id' => $prod->id,
-                        'type'       => 'in',
-                        'quantity'   => $restockQty,
-                        'note'       => 'Restock Otomatis (Seeder)',
-                        'created_at' => $restockDate,
-                        'updated_at' => $restockDate,
-                    ]);
-
-                    $prod->increment('stock', $restockQty);
+                // Final insert for remaining details
+                if (count($detailsToInsert) > 0) {
+                    \DB::table('transaction_details')->insert($detailsToInsert);
                 }
             }
+
+            // =============================================
+            // 6. FINAL STOCK ADJUSTMENT (Sangat Cepat)
+            // =============================================
+            // Secara realistis, kita set saja stok ke angka random yang aman 
+            // karena menghitung stok mundur dari jutaan transaksi akan sangat lambat.
+            \DB::table('products')->where('store_id', $store->id)->update(['stock' => rand(50, 200)]);
         }
+
 
     }
 }
