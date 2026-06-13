@@ -69,9 +69,12 @@
                                 <tr>
                                     <td>
                                         @if($product->photo)
-                                            <img src="{{ asset('storage/' . $product->photo) }}" alt="product" width="50" class="rounded-circle">
+                                            <img src="{{ asset('storage/' . $product->photo) }}" alt="product" width="50" height="50" class="rounded-circle">
                                         @else
-                                            <img src="{{ asset('assets/images/big/icon.png') }}" alt="product" width="50" class="rounded-circle">
+                                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white font-weight-bold" 
+                                                 style="width: 50px; height: 50px; background-color: {{ $product->placeholder_color }}; font-size: 16px;">
+                                                {{ $product->initials }}
+                                            </div>
                                         @endif
                                     </td>
                                     <td>{{ $product->name }}</td>

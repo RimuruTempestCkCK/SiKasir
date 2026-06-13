@@ -41,7 +41,7 @@
                                 <tr>
                                     <td>{{ $product->name }}</td>
                                     <td>{{ $product->category->name ?? '-' }}</td>
-                                    <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($product->selling_price, 0, ',', '.') }}</td>
                                     <td>{{ $product->stock }}</td>
                                     <td>
                                         @if($product->stock <= 5)

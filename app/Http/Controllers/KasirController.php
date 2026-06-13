@@ -33,7 +33,7 @@ class KasirController extends Controller
             ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
             ->where('transactions.store_id', $storeId)
             ->whereDate('transactions.created_at', today())
-            ->selectRaw('categories.name as category, SUM(transaction_details.quantity * transaction_details.price) as total')
+            ->selectRaw('categories.name as category, SUM(transaction_details.quantity * transaction_details.selling_price) as total')
             ->groupBy('categories.name')
             ->get();
 

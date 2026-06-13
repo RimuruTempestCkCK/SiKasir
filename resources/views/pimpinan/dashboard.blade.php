@@ -240,7 +240,19 @@
                                 <tr>
                                     <td class="border-top-0 px-2 py-4">
                                         <div class="d-flex no-block align-items-center">
-                                            <div class="me-3"><img src="{{ asset('assets/images/big/icon.png') }}" alt="user" class="rounded-circle" width="45" height="45" /></div>
+                                            <div class="me-3">
+                                                @php
+                                                    $photo = \App\Models\Product::find($product->id)->photo ?? null;
+                                                @endphp
+                                                @if($photo)
+                                                    <img src="{{ asset('storage/' . $photo) }}" alt="product" class="rounded-circle" width="45" height="45" />
+                                                @else
+                                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white font-weight-bold" 
+                                                         style="width: 45px; height: 45px; background-color: {{ \App\Models\Product::generatePlaceholderColor($product->name) }}; font-size: 14px;">
+                                                        {{ \App\Models\Product::generateInitials($product->name) }}
+                                                    </div>
+                                                @endif
+                                            </div>
                                             <div class="">
                                                 <h5 class="text-dark mb-0 font-16 font-weight-medium">{{ $product->name }}</h5>
                                             </div>

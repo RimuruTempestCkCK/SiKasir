@@ -34,7 +34,12 @@
                                 @if($product->photo)
                                     <img src="{{ asset('storage/' . $product->photo) }}" class="card-img-top p-2" alt="Product" style="height: 120px; object-fit: contain;">
                                 @else
-                                    <img src="{{ asset('assets/images/big/icon.png') }}" class="card-img-top p-2" alt="Product" style="height: 120px; object-fit: contain;">
+                                    <div class="d-flex align-items-center justify-content-center bg-light card-img-top p-2" style="height: 120px;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white font-weight-bold" 
+                                             style="width: 80px; height: 80px; background-color: {{ $product->placeholder_color }}; font-size: 24px;">
+                                            {{ $product->initials }}
+                                        </div>
+                                    </div>
                                 @endif
                                 <div class="card-body p-2 text-center">
                                     <h6 class="card-title mb-1">{{ $product->name }}</h6>
