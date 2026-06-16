@@ -28,22 +28,22 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-3"><i class="fas fa-filter me-2"></i>Filter Report</h4>
+                    <h4 class="card-title mb-3 text-dark"><i class="fas fa-filter me-2"></i>Filter Report</h4>
                     <form action="{{ route('pimpinan.report.transaction') }}" method="GET">
                         <div class="row align-items-end">
                             <div class="col-md-4 mb-3 mb-md-0">
                                 <label class="form-label font-weight-medium">Start Date</label>
-                                <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
+                                <input type="date" name="start_date" class="form-control custom-radius custom-shadow border-0 bg-white" value="{{ $startDate }}">
                             </div>
                             <div class="col-md-4 mb-3 mb-md-0">
                                 <label class="form-label font-weight-medium">End Date</label>
-                                <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
+                                <input type="date" name="end_date" class="form-control custom-radius custom-shadow border-0 bg-white" value="{{ $endDate }}">
                             </div>
                             <div class="col-md-4">
                                 <button type="submit" class="btn btn-primary btn-rounded shadow-sm px-4">
                                     <i class="fas fa-search me-2"></i>Filter
                                 </button>
-                                <a href="{{ route('pimpinan.report.transaction') }}" class="btn btn-light btn-rounded px-4 ms-2">
+                                <a href="{{ route('pimpinan.report.transaction') }}" class="btn btn-light btn-rounded px-4 ms-2 shadow-sm border-0">
                                     <i class="fas fa-undo me-2"></i>Reset
                                 </a>
                             </div>
@@ -57,7 +57,7 @@
     <!-- Summary Cards -->
     <div class="row">
         <div class="col-md-3">
-            <div class="card border-end">
+            <div class="card border-end shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -74,7 +74,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-end">
+            <div class="card border-end shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -91,7 +91,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-end">
+            <div class="card border-end shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -106,7 +106,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -122,28 +122,27 @@
         </div>
     </div>
 
-    <!-- Transaction Table -->
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-4">
-                        <h4 class="card-title">Transaction Details</h4>
+                        <h4 class="card-title text-dark">Transaction Details</h4>
                         <div class="ms-auto">
-                            <button class="btn btn-outline-primary btn-sm btn-rounded" onclick="window.print()">
+                            <button class="btn btn-outline-primary btn-sm btn-rounded shadow-sm" onclick="window.print()">
                                 <i class="fas fa-print me-2"></i>Print Report
                             </button>
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table id="report_table" class="table table-striped table-bordered no-wrap">
+                        <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Invoice</th>
                                     <th>Cashier</th>
-                                    <th>Total Revenue</th>
-                                    <th>Profit</th>
+                                    <th class="text-end">Total Revenue</th>
+                                    <th class="text-end">Profit</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -154,10 +153,10 @@
                                         <span class="font-weight-medium text-dark">{{ $transaction->created_at->format('d M Y') }}</span>
                                         <br><small class="text-muted">{{ $transaction->created_at->format('H:i') }}</small>
                                     </td>
-                                    <td><span class="badge bg-light text-primary border-primary border">{{ $transaction->invoice_number }}</span></td>
-                                    <td>{{ $transaction->cashier->name }}</td>
-                                    <td class="font-weight-medium text-dark">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</td>
-                                    <td class="font-weight-medium text-primary">
+                                    <td><span class="badge bg-light text-primary border-primary border rounded-pill px-3">{{ $transaction->invoice_number }}</span></td>
+                                    <td class="text-muted">{{ $transaction->cashier->name }}</td>
+                                    <td class="font-weight-medium text-dark text-end">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</td>
+                                    <td class="font-weight-medium text-primary text-end">
                                         @php
                                             $trxProfit = $transaction->details->sum(function($detail) {
                                                 return ($detail->selling_price - $detail->purchase_price) * $detail->quantity;
@@ -166,7 +165,7 @@
                                         Rp {{ number_format($trxProfit, 0, ',', '.') }}
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-info btn-circle btn-sm" data-bs-toggle="modal" data-bs-target="#detailModal{{ $transaction->id }}">
+                                        <button class="btn btn-info btn-circle btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#detailModal{{ $transaction->id }}">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </td>
@@ -174,9 +173,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
-                    <div class="mt-4">
-                        {{ $transactions->links() }}
                     </div>
                 </div>
             </div>
@@ -249,16 +245,9 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
     <script>
         $(function () {
-            $('#report_table').DataTable({
-                "paging": false,      // Matikan paging DataTable karena pakai Pagination Laravel
-                "info": false,        // Matikan info bar
-                "searching": false,   // Matikan pencarian client-side (agar tidak lag)
-                "ordering": false     // Matikan sorting client-side (agar tidak lag)
-            });
+            // zero_config is initialized automatically from layouts/app.blade.php
         });
     </script>
 @endpush

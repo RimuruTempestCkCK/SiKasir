@@ -199,31 +199,39 @@
                         <h4 class="card-title">Top Performing Stores</h4>
                     </div>
                     <div class="table-responsive">
-                        <table class="table no-wrap v-middle mb-0">
+                        <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
                             <thead>
-                                <tr class="border-0">
-                                    <th class="border-0 font-14 font-weight-medium text-muted">Store Name</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted px-2">Owner</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted text-center">Transactions</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted">Total Revenue</th>
+                                <tr>
+                                    <th>Store Name</th>
+                                    <th>Owner</th>
+                                    <th class="text-center">Transactions</th>
+                                    <th class="text-end">Total Revenue</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($topStores as $store)
                                 <tr>
-                                    <td class="border-top-0 px-2 py-4">
+                                    <td>
                                         <div class="d-flex no-block align-items-center">
-                                            <div class="me-3"><img src="{{ asset('assets/images/big/icon.png') }}" alt="user" class="rounded-circle" width="45" height="45" /></div>
+                                            <div class="me-3">
+                                                @if($store->logo)
+                                                    <img src="{{ asset('storage/' . $store->logo) }}" alt="store" class="rounded-circle shadow-sm" width="45" height="45" />
+                                                @else
+                                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-light text-muted shadow-sm" style="width: 45px; height: 45px;">
+                                                        <i class="fas fa-store"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
                                             <div class="">
                                                 <h5 class="text-dark mb-0 font-16 font-weight-medium">{{ $store->name }}</h5>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="border-top-0 text-muted px-2 py-4 font-14">{{ $store->owner->name ?? 'Unknown' }}</td>
-                                    <td class="border-top-0 text-center font-weight-medium text-muted px-2 py-4">
+                                    <td>{{ $store->owner->name ?? 'Unknown' }}</td>
+                                    <td class="text-center font-weight-medium text-dark">
                                         {{ $store->transactions_count }}
                                     </td>
-                                    <td class="font-weight-medium text-dark border-top-0 px-2 py-4">
+                                    <td class="font-weight-medium text-dark text-end">
                                         Rp{{ number_format($store->transactions_sum_total_price, 0, ',', '.') }}
                                     </td>
                                 </tr>

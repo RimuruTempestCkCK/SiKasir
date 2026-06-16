@@ -212,28 +212,28 @@
                         <h4 class="card-title">My Top Sold Products Today</h4>
                     </div>
                     <div class="table-responsive">
-                        <table class="table no-wrap v-middle mb-0">
+                        <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
                             <thead>
-                                <tr class="border-0">
-                                    <th class="border-0 font-14 font-weight-medium text-muted">Product</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted px-2">Price</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted text-center">Qty Sold</th>
-                                    <th class="border-0 font-14 font-weight-medium text-muted">Subtotal</th>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-center">Qty Sold</th>
+                                    <th class="text-end">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($topProducts as $product)
                                 <tr>
-                                    <td class="border-top-0 px-2 py-4">
+                                    <td>
                                         <div class="d-flex no-block align-items-center">
                                             <div class="me-3">
                                                 @php
                                                     $photo = \App\Models\Product::find($product->id)->photo ?? null;
                                                 @endphp
                                                 @if($photo)
-                                                    <img src="{{ asset('storage/' . $photo) }}" alt="product" class="rounded-circle" width="45" height="45" />
+                                                    <img src="{{ asset('storage/' . $photo) }}" alt="product" class="rounded-circle shadow-sm" width="45" height="45" />
                                                 @else
-                                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white font-weight-bold" 
+                                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white font-weight-bold shadow-sm" 
                                                          style="width: 45px; height: 45px; background-color: {{ \App\Models\Product::generatePlaceholderColor($product->name) }}; font-size: 14px;">
                                                         {{ \App\Models\Product::generateInitials($product->name) }}
                                                     </div>
@@ -244,20 +244,15 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="border-top-0 text-muted px-2 py-4 font-14">Rp{{ number_format($product->selling_price, 0, ',', '.') }}</td>
-                                    <td class="border-top-0 text-center font-weight-medium text-muted px-2 py-4">
-                                        {{ $product->total_qty }}
+                                    <td class="text-end">Rp{{ number_format($product->selling_price, 0, ',', '.') }}</td>
+                                    <td class="text-center font-weight-medium text-dark">
+                                        <span class="badge bg-light text-primary border-primary border rounded-pill px-3">{{ $product->total_qty }}</span>
                                     </td>
-                                    <td class="font-weight-medium text-dark border-top-0 px-2 py-4">
+                                    <td class="font-weight-medium text-dark text-end">
                                         Rp{{ number_format($product->revenue, 0, ',', '.') }}
                                     </td>
                                 </tr>
                                 @endforeach
-                                @if($topProducts->isEmpty())
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">No products sold today</td>
-                                </tr>
-                                @endif
                             </tbody>
                         </table>
                     </div>

@@ -28,26 +28,30 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/user/{id}', [AdminController::class, 'userDelete'])->name('admin.user.delete');
 
         Route::get('/store', [AdminController::class, 'store']);
+        Route::post('/store', [AdminController::class, 'storeStore'])->name('admin.store.store');
+        Route::put('/store/{id}', [AdminController::class, 'storeUpdate'])->name('admin.store.update');
+        Route::delete('/store/{id}', [AdminController::class, 'storeDelete'])->name('admin.store.delete');
     });
 
     // Pimpinan (Owner) Routes
     Route::middleware(['role:pimpinan'])->prefix('pimpinan')->group(function () {
-        Route::get('/', [PimpinanController::class, 'dashboard']);
-        Route::get('/store', [PimpinanController::class, 'storeInfo']);
+        Route::get('/', [PimpinanController::class, 'dashboard'])->name('pimpinan.dashboard');
+        Route::get('/store', [PimpinanController::class, 'storeInfo'])->name('pimpinan.store');
+        Route::put('/store', [PimpinanController::class, 'storeUpdate'])->name('pimpinan.store.update');
         
         // Product CRUD
-        Route::get('/product', [PimpinanController::class, 'product']);
+        Route::get('/product', [PimpinanController::class, 'product'])->name('pimpinan.product');
         Route::post('/product', [PimpinanController::class, 'productStore'])->name('pimpinan.product.store');
         Route::put('/product/{id}', [PimpinanController::class, 'productUpdate'])->name('pimpinan.product.update');
         Route::delete('/product/{id}', [PimpinanController::class, 'productDelete'])->name('pimpinan.product.delete');
 
         // Kasir CRUD
-        Route::get('/kasir', [PimpinanController::class, 'kasir']);
+        Route::get('/kasir', [PimpinanController::class, 'kasir'])->name('pimpinan.kasir');
         Route::post('/kasir', [PimpinanController::class, 'kasirStore'])->name('pimpinan.kasir.store');
         Route::put('/kasir/{id}', [PimpinanController::class, 'kasirUpdate'])->name('pimpinan.kasir.update');
         Route::delete('/kasir/{id}', [PimpinanController::class, 'kasirDelete'])->name('pimpinan.kasir.delete');
 
-        Route::get('/stock', [PimpinanController::class, 'stock']);
+        Route::get('/stock', [PimpinanController::class, 'stock'])->name('pimpinan.stock');
         Route::post('/stock', [PimpinanController::class, 'stockAdd'])->name('pimpinan.stock.add');
         Route::get('/report/transaction', [PimpinanController::class, 'reportTransaction'])->name('pimpinan.report.transaction');
         Route::get('/report/stock', [PimpinanController::class, 'reportStock'])->name('pimpinan.report.stock');
@@ -55,11 +59,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Kasir Routes
     Route::middleware(['role:kasir'])->prefix('kasir')->group(function () {
-        Route::get('/', [KasirController::class, 'dashboard']);
-        Route::get('/transaction', [KasirController::class, 'transaction']);
+        Route::get('/', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
+        Route::get('/transaction', [KasirController::class, 'transaction'])->name('kasir.transaction');
         Route::post('/transaction', [KasirController::class, 'transactionStore'])->name('kasir.transaction.store');
         Route::get('/history', [KasirController::class, 'history'])->name('kasir.history');
-        Route::get('/stock', [KasirController::class, 'stock']);
+        Route::get('/stock', [KasirController::class, 'stock'])->name('kasir.stock');
     });
 
 });

@@ -17,9 +17,40 @@
     </div>
 </div>
 <div class="container-fluid">
-    <!-- ============================================================== -->
-    <!-- Start Page Content -->
-    <!-- ============================================================== -->
+    <!-- Filter Card -->
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title mb-3"><i class="fas fa-filter me-2"></i>Filter Stock Updated</h4>
+            <form action="{{ route('pimpinan.stock') }}" method="GET">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label font-weight-medium">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label font-weight-medium">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label font-weight-medium">Search</label>
+                            <input type="text" name="search" class="form-control" placeholder="Search product name..." value="{{ $search }}">
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0">
+                        <button type="submit" class="btn btn-primary btn-rounded w-100 shadow-sm">
+                            <i class="fas fa-search"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-12">
             @if(session('success'))
@@ -32,9 +63,9 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-4">
-                        <h4 class="card-title">Stock Status</h4>
+                        <h4 class="card-title text-dark">Stock Status</h4>
                         <div class="ms-auto">
-                            <button type="button" class="btn btn-success btn-rounded" data-bs-toggle="modal"
+                            <button type="button" class="btn btn-success btn-rounded shadow-sm" data-bs-toggle="modal"
                                 data-bs-target="#addStockModal">
                                 <i class="fas fa-plus"></i> Add Stock
                             </button>
@@ -45,31 +76,31 @@
                             <thead>
                                 <tr>
                                     <th>Product Name</th>
-                                    <th>Current Stock</th>
-                                    <th>Status</th>
-                                    <th>Last Updated</th>
-                                    <th>Action</th>
+                                    <th class="text-center">Current Stock</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Last Updated</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($products as $product)
                                 <tr>
-                                    <td>{{ $product->name }}</td>
-                                    <td>{{ $product->stock }}</td>
-                                    <td>
+                                    <td class="font-weight-medium text-dark">{{ $product->name }}</td>
+                                    <td class="text-center font-weight-bold text-dark">{{ $product->stock }}</td>
+                                    <td class="text-center">
                                         @if($product->stock <= 5)
-                                            <span class="badge bg-danger">Low Stock</span>
+                                            <span class="badge bg-danger rounded-pill font-12 font-weight-medium text-white px-3">Low Stock</span>
                                         @elseif($product->stock <= 20)
-                                            <span class="badge bg-warning text-dark">Medium Stock</span>
+                                            <span class="badge bg-warning rounded-pill font-12 font-weight-medium text-dark px-3">Medium Stock</span>
                                         @else
-                                            <span class="badge bg-success">Good Stock</span>
+                                            <span class="badge bg-success rounded-pill font-12 font-weight-medium text-white px-3">Good Stock</span>
                                         @endif
                                     </td>
-                                    <td>{{ $product->updated_at->format('d/m/Y H:i') }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-success btn-rounded" data-bs-toggle="modal"
-                                            data-bs-target="#addStockModal" onclick="document.getElementById('product_select').value = '{{ $product->id }}'">
-                                            <i class="fas fa-plus"></i> Restock
+                                    <td class="text-center text-muted font-14">{{ $product->updated_at->format('d/m/Y H:i') }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-success btn-circle shadow-sm" data-bs-toggle="modal"
+                                            data-bs-target="#addStockModal" onclick="document.getElementById('product_select').value = '{{ $product->id }}'" title="Restock">
+                                            <i class="fas fa-plus"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -86,9 +117,9 @@
     <div id="addStockModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addStockModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header modal-colored-header bg-success">
-                    <h4 class="modal-title" id="addStockModalLabel">Add Stock</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                <div class="modal-header modal-colored-header bg-success text-white">
+                    <h4 class="modal-title" id="addStockModalLabel">Add Product Stock</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <form action="{{ route('pimpinan.stock.add') }}" method="POST">
                     @csrf

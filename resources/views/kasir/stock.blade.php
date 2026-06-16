@@ -17,23 +17,20 @@
     </div>
 </div>
 <div class="container-fluid">
-    <!-- ============================================================== -->
-    <!-- Start Page Content -->
-    <!-- ============================================================== -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h4 class="card-title">Available Stock</h4>
+                    <h4 class="card-title text-dark mb-4">Available Stock</h4>
                     <div class="table-responsive">
                         <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
                             <thead>
                                 <tr>
                                     <th>Product Name</th>
                                     <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Current Stock</th>
-                                    <th>Status</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-center">Current Stock</th>
+                                    <th class="text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -41,15 +38,15 @@
                                 <tr>
                                     <td>{{ $product->name }}</td>
                                     <td>{{ $product->category->name ?? '-' }}</td>
-                                    <td>Rp {{ number_format($product->selling_price, 0, ',', '.') }}</td>
-                                    <td>{{ $product->stock }}</td>
-                                    <td>
+                                    <td class="text-end font-weight-medium">Rp {{ number_format($product->selling_price, 0, ',', '.') }}</td>
+                                    <td class="text-center text-dark font-weight-medium">{{ $product->stock }}</td>
+                                    <td class="text-center">
                                         @if($product->stock <= 5)
-                                            <span class="badge bg-danger">Low Stock</span>
+                                            <span class="badge bg-danger rounded-pill font-12 font-weight-medium text-white px-3">Low Stock</span>
                                         @elseif($product->stock <= 20)
-                                            <span class="badge bg-warning text-dark">Medium Stock</span>
+                                            <span class="badge bg-warning rounded-pill font-12 font-weight-medium text-dark px-3">Medium Stock</span>
                                         @else
-                                            <span class="badge bg-success">In Stock</span>
+                                            <span class="badge bg-success rounded-pill font-12 font-weight-medium text-white px-3">In Stock</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -61,8 +58,5 @@
             </div>
         </div>
     </div>
-    <!-- ============================================================== -->
-    <!-- End PAge Content -->
-    <!-- ============================================================== -->
 </div>
 @endsection

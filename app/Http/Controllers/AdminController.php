@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -119,5 +120,64 @@ class AdminController extends Controller
     {
         $stores = Store::with(['owner', 'cashiers'])->get();
         return view('admin.store', compact('stores'));
+    }
+
+    public function storeStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('stores', 'public');
+        }
+
+        Store::create([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'description' => $request->description,
+            'logo' => $logoPath,
+        ]);
+
+        return redirect()->back()->with('success', 'Store created successfully.');
+    }
+
+    public function storeUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $store = Store::findOrFail($id);
+
+        if ($request->hasFile('logo')) {
+            if ($store->logo) {
+                Storage::disk('public')->delete($store->logo);
+            }
+            $store->logo = $request->file('logo')->store('stores', 'public');
+        }
+
+        $store->update([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->back()->with('success', 'Store updated successfully.');
+    }
+
+    public function storeDelete($id)
+    {
+        $store = Store::findOrFail($id);
+        if ($store->logo) {
+            Storage::disk('public')->delete($store->logo);
+        }
+        $store->delete();
+        return redirect()->back()->with('success', 'Store deleted successfully.');
     }
 }

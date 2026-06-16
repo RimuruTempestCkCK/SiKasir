@@ -89,12 +89,61 @@ class PimpinanController extends Controller
         return view('pimpinan.store', compact('store'));
     }
 
-    public function product()
+    public function storeUpdate(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $store = Auth::user()->ownedStore;
+
+        if ($request->hasFile('logo')) {
+            if ($store->logo) {
+                Storage::disk('public')->delete($store->logo);
+            }
+            $store->logo = $request->file('logo')->store('stores', 'public');
+        }
+
+        $store->update([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->back()->with('success', 'Store information updated successfully.');
+    }
+
+    public function product(Request $request)
     {
         $store = Auth::user()->ownedStore;
-        $products = Product::where('store_id', $store->id)->with('category')->get();
+        $query = Product::where('store_id', $store->id)->with('category');
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+        $search = $request->search;
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('category', function($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $products = $query->latest()->paginate(10)->withQueryString();
         $categories = Category::where('store_id', $store->id)->get();
-        return view('pimpinan.product', compact('products', 'categories'));
+        
+        return view('pimpinan.product', compact('products', 'categories', 'startDate', 'endDate', 'search'));
     }
 
     public function productStore(Request $request)
@@ -220,11 +269,28 @@ class PimpinanController extends Controller
         return redirect()->back()->with('success', 'Cashier deleted successfully.');
     }
 
-    public function stock()
+    public function stock(Request $request)
     {
         $store = Auth::user()->ownedStore;
-        $products = Product::where('store_id', $store->id)->get();
-        return view('pimpinan.stock', compact('products'));
+        $query = Product::where('store_id', $store->id);
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+        $search = $request->search;
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('updated_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $products = $query->latest('updated_at')->paginate(10)->withQueryString();
+        return view('pimpinan.stock', compact('products', 'startDate', 'endDate', 'search'));
     }
 
     public function stockAdd(Request $request)

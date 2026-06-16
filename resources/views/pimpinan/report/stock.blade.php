@@ -1,10 +1,5 @@
 @extends('layouts.app')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css') }}">
-@endpush
-
 @section('content')
 <div class="page-breadcrumb">
     <div class="row">
@@ -28,7 +23,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-3"><i class="fas fa-filter me-2"></i>Filter Report</h4>
+                    <h4 class="card-title mb-3 text-dark"><i class="fas fa-filter me-2"></i>Filter Report</h4>
                     <form action="{{ route('pimpinan.report.stock') }}" method="GET">
                         <div class="row align-items-end">
                             <div class="col-md-4 mb-3 mb-md-0">
@@ -43,7 +38,7 @@
                                 <button type="submit" class="btn btn-primary btn-rounded shadow-sm px-4">
                                     <i class="fas fa-search me-2"></i>Filter
                                 </button>
-                                <a href="{{ route('pimpinan.report.stock') }}" class="btn btn-light btn-rounded px-4 ms-2">
+                                <a href="{{ route('pimpinan.report.stock') }}" class="btn btn-light btn-rounded px-4 ms-2 shadow-sm border-0">
                                     <i class="fas fa-undo me-2"></i>Reset
                                 </a>
                             </div>
@@ -57,7 +52,7 @@
     <!-- Summary Cards -->
     <div class="row">
         <div class="col-md-4">
-            <div class="card border-end">
+            <div class="card border-end shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -74,7 +69,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-end">
+            <div class="card border-end shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -89,7 +84,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
@@ -105,27 +100,26 @@
         </div>
     </div>
 
-    <!-- Stock Log Table -->
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-4">
-                        <h4 class="card-title">Stock Movement History</h4>
+                        <h4 class="card-title text-dark">Stock Movement History</h4>
                         <div class="ms-auto">
-                            <button class="btn btn-outline-primary btn-sm btn-rounded" onclick="window.print()">
+                            <button class="btn btn-outline-primary btn-sm btn-rounded shadow-sm" onclick="window.print()">
                                 <i class="fas fa-print me-2"></i>Print Report
                             </button>
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table id="report_table" class="table table-striped table-bordered no-wrap">
+                        <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Product</th>
-                                    <th>Type</th>
-                                    <th>Quantity</th>
+                                    <th class="text-center">Type</th>
+                                    <th class="text-center">Quantity</th>
                                     <th>Note</th>
                                 </tr>
                             </thead>
@@ -137,14 +131,14 @@
                                         <br><small class="text-muted">{{ $log->created_at->format('H:i') }}</small>
                                     </td>
                                     <td class="font-weight-medium text-dark">{{ $log->product->name }}</td>
-                                    <td>
+                                    <td class="text-center">
                                         @if($log->type == 'in')
-                                            <span class="badge bg-light text-success border-success border">Stock In</span>
+                                            <span class="badge bg-light text-success border-success border rounded-pill px-3">Stock In</span>
                                         @else
-                                            <span class="badge bg-light text-danger border-danger border">Stock Out</span>
+                                            <span class="badge bg-light text-danger border-danger border rounded-pill px-3">Stock Out</span>
                                         @endif
                                     </td>
-                                    <td class="font-weight-medium {{ $log->type == 'in' ? 'text-success' : 'text-danger' }}">
+                                    <td class="text-center font-weight-medium {{ $log->type == 'in' ? 'text-success' : 'text-danger' }}">
                                         {{ $log->type == 'in' ? '+' : '-' }}{{ number_format($log->quantity, 0, ',', '.') }}
                                     </td>
                                     <td class="text-muted">{{ $log->note ?? '-' }}</td>
@@ -153,27 +147,9 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4">
-                        {{ $stockLogs->links() }}
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-    <script src="{{ asset('assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
-    <script>
-        $(function () {
-            $('#report_table').DataTable({
-                "paging": false,
-                "info": false,
-                "searching": false,
-                "ordering": false
-            });
-        });
-    </script>
-@endpush

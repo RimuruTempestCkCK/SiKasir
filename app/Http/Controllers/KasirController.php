@@ -141,16 +141,31 @@ class KasirController extends Controller
         }
     }
 
-    public function history()
+    public function history(Request $request)
     {
         $storeId = Auth::user()->store_id;
-        $transactions = Transaction::where('store_id', $storeId)
+        $query = Transaction::where('store_id', $storeId)
             ->where('user_id', Auth::id())
-            ->with('details.product')
-            ->latest()
-            ->paginate(10);
+            ->with('details.product');
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+        $search = $request->search;
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        if ($search) {
+            $query->where('invoice_number', 'like', "%{$search}%");
+        }
+
+        $transactions = $query->latest()->paginate(10)->withQueryString();
             
-        return view('kasir.history', compact('transactions'));
+        return view('kasir.history', compact('transactions', 'startDate', 'endDate', 'search'));
     }
 
     public function stock()
